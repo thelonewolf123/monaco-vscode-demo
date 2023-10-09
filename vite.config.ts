@@ -111,6 +111,11 @@ export default defineConfig({
             '@codingame/monaco-vscode-theme-seti-default-extension',
             '@codingame/monaco-vscode-references-view-default-extension',
             '@codingame/monaco-vscode-media-preview-default-extension',
+            '@codingame/monaco-vscode-json-language-features-default-extension',
+            '@codingame/monaco-vscode-typescript-language-features-default-extension',
+            '@codingame/monaco-vscode-html-language-features-default-extension',
+            '@codingame/monaco-vscode-css-language-features-default-extension',
+            '@codingame/monaco-vscode-markdown-language-features-default-extension',
             'vscode/workers/textmate.worker'
         ],
         esbuildOptions: {
