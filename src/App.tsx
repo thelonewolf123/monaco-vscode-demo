@@ -1,21 +1,18 @@
-import { editor } from 'monaco-editor'
-import { useEffect, useRef } from 'react'
-import { Uri } from 'vscode'
-import { createConfiguredEditor, createModelReference } from 'vscode/monaco'
-import { initialize } from 'vscode/services'
+import './setup'
 
-import getModelOverride from '@codingame/monaco-vscode-model-service-override'
-import getViewsOverride from '@codingame/monaco-vscode-views-service-override'
+import { useEffect, useRef } from 'react'
+
+import {
+    attachPart,
+    isPartVisibile,
+    onPartVisibilityChange,
+    Parts
+} from '@codingame/monaco-vscode-views-service-override'
 
 function App() {
     const editorRef = useRef<HTMLDivElement>(null)
     // const editorInstance = useRef<editor.IStandaloneCodeEditor>()
     useEffect(() => {
-        initialize({
-            ...getModelOverride(),
-            ...getViewsOverride()
-        })
-
         async function handle() {
             // const modelRef = await createModelReference(
             //     Uri.file('src/App.tsx'),
@@ -27,6 +24,22 @@ function App() {
             //     language: 'typescript'
             // })
             // editorInstance.current.setModel(modelRef.object.textEditorModel)
+
+            await new Promise((resolve) => setTimeout(resolve, 10000))
+
+            if (!editorRef.current) return
+
+            const part = Parts.EDITOR_PART
+            attachPart(part, editorRef.current)
+
+            if (!isPartVisibile(part)) {
+                editorRef.current.style.display = 'none'
+            }
+
+            onPartVisibilityChange(part, (visible) => {
+                if (!editorRef.current) return
+                editorRef.current.style.display = visible ? 'block' : 'none'
+            })
         }
 
         handle()
