@@ -160,7 +160,7 @@ export default defineConfig({
     server: {
         port: 5173,
         origin: cdnDomain,
-        host: '0.0.0.0',
+        host: 'localhost',
         fs: {
             allow: ['../'] // allow to load codicon.ttf from monaco-editor in the parent folder
         }
