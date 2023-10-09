@@ -3,7 +3,7 @@ import path from 'path'
 import url from 'url'
 import { defineConfig } from 'vite'
 
-const cdnDomain = 'http://127.0.0.2:5173'
+const cdnDomain = 'http://127.0.0.1:5173'
 
 export default defineConfig({
     build: {
@@ -98,6 +98,19 @@ export default defineConfig({
             '@codingame/monaco-vscode-environment-service-override',
             '@codingame/monaco-vscode-lifecycle-service-override',
             '@codingame/monaco-vscode-workspace-trust-service-override',
+            '@codingame/monaco-vscode-css-default-extension',
+            '@codingame/monaco-vscode-diff-default-extension',
+            '@codingame/monaco-vscode-html-default-extension',
+            '@codingame/monaco-vscode-javascript-default-extension',
+            '@codingame/monaco-vscode-json-default-extension',
+            '@codingame/monaco-vscode-markdown-basics-default-extension',
+            '@codingame/monaco-vscode-scss-default-extension',
+            '@codingame/monaco-vscode-typescript-basics-default-extension',
+            '@codingame/monaco-vscode-yaml-default-extension',
+            '@codingame/monaco-vscode-theme-defaults-default-extension',
+            '@codingame/monaco-vscode-theme-seti-default-extension',
+            '@codingame/monaco-vscode-references-view-default-extension',
+            '@codingame/monaco-vscode-media-preview-default-extension',
             'vscode/workers/textmate.worker'
         ],
         esbuildOptions: {
@@ -136,7 +149,6 @@ export default defineConfig({
                                     i = assetImportMetaUrlRE.lastIndex
                                 }
                                 newCode += code.slice(i)
-
                                 return { contents: newCode }
                             }
                         )

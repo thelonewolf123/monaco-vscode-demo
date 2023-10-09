@@ -1,4 +1,5 @@
 import * as monaco from 'monaco-editor'
+import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker.js?worker'
 import { initialize as initializeVscodeExtensions } from 'vscode/extensions'
 import {
     getService,
@@ -18,10 +19,12 @@ import getEnvironmentServiceOverride from '@codingame/monaco-vscode-environment-
 import getExtensionServiceOverride from '@codingame/monaco-vscode-extensions-service-override'
 import getKeybindingsServiceOverride from '@codingame/monaco-vscode-keybindings-service-override'
 import getLanguageDetectionWorkerServiceOverride from '@codingame/monaco-vscode-language-detection-worker-service-override'
+import LanguageDetectionWorker from '@codingame/monaco-vscode-language-detection-worker-service-override/worker?worker'
 import getLanguagesServiceOverride from '@codingame/monaco-vscode-languages-service-override'
 import getLifecycleServiceOverride from '@codingame/monaco-vscode-lifecycle-service-override'
 import getModelServiceOverride from '@codingame/monaco-vscode-model-service-override'
 import getNotificationServiceOverride from '@codingame/monaco-vscode-notifications-service-override'
+import OutputLinkComputerWorker from '@codingame/monaco-vscode-output-service-override/worker?worker'
 import getPreferencesServiceOverride from '@codingame/monaco-vscode-preferences-service-override'
 import getQuickAccessServiceOverride from '@codingame/monaco-vscode-quickaccess-service-override'
 import getSnippetServiceOverride from '@codingame/monaco-vscode-snippets-service-override'
@@ -29,23 +32,39 @@ import getStorageServiceOverride, {
     BrowserStorageService
 } from '@codingame/monaco-vscode-storage-service-override'
 import getTextmateServiceOverride from '@codingame/monaco-vscode-textmate-service-override'
+import TextMateWorker from '@codingame/monaco-vscode-textmate-service-override/worker?worker'
 import getThemeServiceOverride from '@codingame/monaco-vscode-theme-service-override'
 import getBannerServiceOverride from '@codingame/monaco-vscode-view-banner-service-override'
 import getStatusBarServiceOverride from '@codingame/monaco-vscode-view-status-bar-service-override'
 import getTitleBarServiceOverride from '@codingame/monaco-vscode-view-title-bar-service-override'
 import getViewsServiceOverride, {
-    attachPart,
-    isEditorPartVisible,
-    isPartVisibile,
-    onPartVisibilityChange,
-    Parts
+    isEditorPartVisible
 } from '@codingame/monaco-vscode-views-service-override'
 import getWorkspaceTrustOverride from '@codingame/monaco-vscode-workspace-trust-service-override'
 
 import { openNewCodeEditor } from './editor'
+import { toCrossOriginWorker } from './tools/workers'
 
 // Workers
 export type WorkerLoader = () => Worker
+
+const workerLoaders: Partial<Record<string, WorkerLoader>> = {
+    editorWorkerService: () => new (toCrossOriginWorker(EditorWorker))(),
+    textMateWorker: () => new (toCrossOriginWorker(TextMateWorker))(),
+    outputLinkComputer: () =>
+        new (toCrossOriginWorker(OutputLinkComputerWorker))(),
+    languageDetectionWorkerService: () =>
+        new (toCrossOriginWorker(LanguageDetectionWorker))()
+}
+window.MonacoEnvironment = {
+    getWorker: function (moduleId, label) {
+        const workerFactory = workerLoaders[label]
+        if (workerFactory != null) {
+            return workerFactory()
+        }
+        throw new Error(`Unimplemented worker ${label} (${moduleId})`)
+    }
+}
 
 const params = new URL(document.location.href).searchParams
 const remoteAuthority = params.get('remoteAuthority') ?? undefined
@@ -104,25 +123,3 @@ export async function clearStorage(): Promise<void> {
 }
 
 await initializeVscodeExtensions()
-
-for (const { part, element } of [
-    { part: Parts.TITLEBAR_PART, element: '#titleBar' },
-    { part: Parts.BANNER_PART, element: '#banner' },
-    { part: Parts.SIDEBAR_PART, element: '#sidebar' },
-    { part: Parts.ACTIVITYBAR_PART, element: '#activityBar' },
-    { part: Parts.PANEL_PART, element: '#panel' },
-    { part: Parts.EDITOR_PART, element: '#editors' },
-    { part: Parts.STATUSBAR_PART, element: '#statusBar' },
-    { part: Parts.AUXILIARYBAR_PART, element: '#auxiliaryBar' }
-]) {
-    const el = document.querySelector<HTMLDivElement>(element)!
-    attachPart(part, el)
-
-    if (!isPartVisibile(part)) {
-        el.style.display = 'none'
-    }
-
-    onPartVisibilityChange(part, (visible) => {
-        el.style.display = visible ? 'block' : 'none'
-    })
-}
