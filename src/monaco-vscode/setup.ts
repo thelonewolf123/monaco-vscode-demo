@@ -1,33 +1,13 @@
-import '@codingame/monaco-vscode-clojure-default-extension'
-import '@codingame/monaco-vscode-coffeescript-default-extension'
-import '@codingame/monaco-vscode-cpp-default-extension'
-import '@codingame/monaco-vscode-csharp-default-extension'
 import '@codingame/monaco-vscode-css-default-extension'
 import '@codingame/monaco-vscode-diff-default-extension'
-import '@codingame/monaco-vscode-fsharp-default-extension'
-import '@codingame/monaco-vscode-go-default-extension'
-import '@codingame/monaco-vscode-groovy-default-extension'
 import '@codingame/monaco-vscode-html-default-extension'
-import '@codingame/monaco-vscode-java-default-extension'
 import '@codingame/monaco-vscode-javascript-default-extension'
 import '@codingame/monaco-vscode-json-default-extension'
-import '@codingame/monaco-vscode-julia-default-extension'
-import '@codingame/monaco-vscode-lua-default-extension'
 import '@codingame/monaco-vscode-markdown-basics-default-extension'
-import '@codingame/monaco-vscode-objective-c-default-extension'
-import '@codingame/monaco-vscode-perl-default-extension'
-import '@codingame/monaco-vscode-php-default-extension'
-import '@codingame/monaco-vscode-powershell-default-extension'
-import '@codingame/monaco-vscode-python-default-extension'
-import '@codingame/monaco-vscode-r-default-extension'
-import '@codingame/monaco-vscode-ruby-default-extension'
-import '@codingame/monaco-vscode-rust-default-extension'
 import '@codingame/monaco-vscode-scss-default-extension'
 import '@codingame/monaco-vscode-shellscript-default-extension'
 import '@codingame/monaco-vscode-sql-default-extension'
-import '@codingame/monaco-vscode-swift-default-extension'
 import '@codingame/monaco-vscode-typescript-basics-default-extension'
-import '@codingame/monaco-vscode-vb-default-extension'
 import '@codingame/monaco-vscode-xml-default-extension'
 import '@codingame/monaco-vscode-yaml-default-extension'
 import '@codingame/monaco-vscode-theme-defaults-default-extension'
@@ -115,11 +95,6 @@ window.MonacoEnvironment = {
     }
 }
 
-const params = new URL(document.location.href).searchParams
-const remoteAuthority = params.get('remoteAuthority') ?? undefined
-const remotePath =
-    remoteAuthority != null ? params.get('remotePath') ?? undefined : undefined
-
 export async function initMonacoServiceOverride() {
     // Override services
     await initializeMonacoService({
@@ -127,18 +102,7 @@ export async function initMonacoServiceOverride() {
         ...getModelServiceOverride(),
         ...getNotificationServiceOverride(),
         ...getDialogsServiceOverride(),
-        ...getConfigurationServiceOverride(
-            remotePath == null
-                ? monaco.Uri.file('/tmp')
-                : {
-                      id: 'remote-workspace',
-                      uri: monaco.Uri.from({
-                          scheme: 'vscode-remote',
-                          path: remotePath,
-                          authority: remoteAuthority
-                      })
-                  }
-        ),
+        ...getConfigurationServiceOverride(monaco.Uri.file('/code')),
         ...getKeybindingsServiceOverride(),
         ...getTextmateServiceOverride(),
         ...getThemeServiceOverride(),
@@ -164,7 +128,6 @@ export async function initMonacoServiceOverride() {
         ...getStorageServiceOverride(),
         ...getLifecycleServiceOverride(),
         ...getEnvironmentServiceOverride({
-            remoteAuthority,
             enableWorkspaceTrust: true
         }),
         ...getWorkspaceTrustOverride()
@@ -177,5 +140,3 @@ export async function initMonacoServiceOverride() {
 export async function clearStorage(): Promise<void> {
     await ((await getService(IStorageService)) as BrowserStorageService).clear()
 }
-
-await initMonacoServiceOverride()
